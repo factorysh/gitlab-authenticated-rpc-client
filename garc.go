@@ -11,6 +11,7 @@ import (
 
 	"gitlab.bearstech.com/bearstech/journaleux/gar/client/auth"
 	"gitlab.bearstech.com/bearstech/journaleux/rpc"
+	"golang.org/x/oauth2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -28,7 +29,9 @@ func main() {
 
 	// Set up a connection to the server.
 	conn, err := grpc.Dial(domain+port,
-		grpc.WithPerRPCCredentials(&auth.JWTAuth{Token: "password"}),
+		grpc.WithPerRPCCredentials(&auth.JWTAuth{Token: &oauth2.Token{
+			AccessToken: "plop",
+		}}),
 		grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
 			InsecureSkipVerify: true,
 		})),
@@ -43,6 +46,11 @@ func main() {
 	ctx := context.Background()
 
 	hello, err := h.SayHello(ctx, &rpc.HelloRequest{os.Args[2]})
+	if err != nil {
+		log.Fatalf("Can't hello: %v", err)
+	}
+	log.Println(hello)
+	hello, err = h.SayHello(ctx, &rpc.HelloRequest{"Super " + os.Args[2]})
 	if err != nil {
 		log.Fatalf("Can't hello: %v", err)
 	}
