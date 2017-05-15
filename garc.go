@@ -10,6 +10,7 @@ import (
 	"golang.org/x/net/context"
 
 	"gitlab.bearstech.com/bearstech/journaleux/gar/client/auth"
+	"gitlab.bearstech.com/bearstech/journaleux/gar/client/conf"
 	"gitlab.bearstech.com/bearstech/journaleux/gar/rpc"
 	"golang.org/x/oauth2"
 	"google.golang.org/grpc"
@@ -27,6 +28,12 @@ var (
 func main() {
 	domain := os.Args[1]
 
+	cfg := conf.NewConf("gar", domain)
+	t, err := cfg.Token()
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println(t)
 	// Set up a connection to the server.
 	conn, err := grpc.Dial(domain+port,
 		grpc.WithPerRPCCredentials(&auth.JWTAuth{Token: &oauth2.Token{
