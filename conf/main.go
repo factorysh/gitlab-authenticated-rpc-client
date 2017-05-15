@@ -25,14 +25,31 @@ func NewConf(name, domain string) *Conf {
 }
 
 func (c *Conf) makeDomainHome() error {
-	domainPath := filepath.Join(c.User.HomeDir, "."+c.Name, c.Domain)
-	return os.MkdirAll(domainPath, 0700)
+	return os.MkdirAll(c.domainHomePath(), 0700)
+}
+
+func (c *Conf) domainHomePath() string {
+	return filepath.Join(c.User.HomeDir, "."+c.Name, c.Domain)
+}
+
+func (c *Conf) tokenPath() string {
+	return filepath.Join(c.domainHomePath(), "token.json")
+}
+
+func (c *Conf) SaveToken(token *oauth2.Token) error {
+	err := c.makeDomainHome()
+	if err != nil {
+		return err
+	}
+	raw, err := json.Marshal(token)
+	if err != nil {
+		return err
+	}
+	return ioutil.WriteFile(c.tokenPath(), raw, 0600)
 }
 
 func (c *Conf) Token() (*oauth2.Token, error) {
-	tokenPath := filepath.Join(c.User.HomeDir, "."+c.Name, c.Domain,
-		"token.json")
-	raw, err := ioutil.ReadFile(tokenPath)
+	raw, err := ioutil.ReadFile(c.tokenPath())
 	if err != nil {
 		if os.IsNotExist(err) { // file not exist
 			return nil, nil
