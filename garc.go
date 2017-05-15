@@ -12,9 +12,9 @@ import (
 	"gitlab.bearstech.com/bearstech/journaleux/gar/client/auth"
 	"gitlab.bearstech.com/bearstech/journaleux/gar/client/conf"
 	"gitlab.bearstech.com/bearstech/journaleux/gar/rpc"
-	"golang.org/x/oauth2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/metadata"
 )
 
 const (
@@ -36,9 +36,7 @@ func main() {
 	log.Println(t)
 	// Set up a connection to the server.
 	conn, err := grpc.Dial(domain+port,
-		grpc.WithPerRPCCredentials(&auth.JWTAuth{Token: &oauth2.Token{
-			AccessToken: "plop",
-		}}),
+		grpc.WithPerRPCCredentials(&auth.JWTAuth{Token: t}),
 		grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
 			InsecureSkipVerify: true,
 		})),
@@ -51,15 +49,16 @@ func main() {
 	h := rpc.NewHelloServiceClient(conn)
 
 	ctx := context.Background()
+	md := metadata.Pairs()
 
-	hello, err := h.SayHello(ctx, &rpc.HelloRequest{os.Args[2]})
+	hello, err := h.SayHello(ctx, &rpc.HelloRequest{os.Args[2]}, grpc.Trailer(&md))
 	if err != nil {
-		log.Fatalf("Can't hello: %v", err)
+		log.Fatalf("Can't hello: %v %v\n", err, md)
 	}
 	log.Println(hello)
-	hello, err = h.SayHello(ctx, &rpc.HelloRequest{"Super " + os.Args[2]})
+	hello, err = h.SayHello(ctx, &rpc.HelloRequest{"Super " + os.Args[2]}, grpc.Trailer(&md))
 	if err != nil {
-		log.Fatalf("Can't hello: %v", err)
+		log.Fatalf("Can't hello: %v %v\n", err, md)
 	}
 	log.Println(hello)
 
