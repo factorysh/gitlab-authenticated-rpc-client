@@ -10,7 +10,7 @@ import (
 	"golang.org/x/net/context"
 
 	"gitlab.bearstech.com/bearstech/journaleux/gar/client/auth"
-	"gitlab.bearstech.com/bearstech/journaleux/rpc"
+	"gitlab.bearstech.com/bearstech/journaleux/gar/rpc"
 	"golang.org/x/oauth2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
