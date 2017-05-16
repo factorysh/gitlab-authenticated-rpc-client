@@ -33,7 +33,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println(t)
+	log.Printf("Token: %s", t)
 	// Set up a connection to the server.
 	conn, err := grpc.Dial(domain+port,
 		grpc.WithPerRPCCredentials(&auth.IdAuth{Token: t}),
@@ -55,11 +55,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("Can't hello: %v %v\n", err, md)
 	}
-	log.Println(hello)
+	log.Printf("Hello: %s\n", hello)
 	hello, err = h.SayHello(ctx, &rpc.HelloRequest{"Super " + os.Args[2]}, grpc.Trailer(&md))
 	if err != nil {
 		log.Fatalf("Can't hello: %v %v\n", err, md)
 	}
-	log.Println(hello)
+	log.Printf("Super Hello: %s\n", hello)
 
 }

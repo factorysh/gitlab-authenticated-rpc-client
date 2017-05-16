@@ -35,22 +35,26 @@ func (c *Conf) idPath() string {
 	return filepath.Join(c.domainHomePath(), "user.id")
 }
 
-func (c *Conf) Token() (string, error) {
+func (c *Conf) Token() (*uuid.UUID, error) {
 	id, err := ioutil.ReadFile(c.idPath())
 	if err == nil {
-		return string(id), nil
+		u, err := uuid.FromBytes(id)
+		if err != nil {
+			return nil, err
+		}
+		return &u, nil
 	}
 	if os.IsNotExist(err) { // file not exist
 		err = c.makeDomainHome()
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 		u := uuid.NewV4()
 		err = ioutil.WriteFile(c.idPath(), u.Bytes(), 0600)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
-		return u.String(), nil
+		return &u, nil
 	}
-	return "", err
+	return nil, err
 }
