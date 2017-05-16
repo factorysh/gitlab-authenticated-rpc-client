@@ -15,6 +15,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 )
 
 const (
@@ -53,6 +54,10 @@ func main() {
 
 	hello, err := h.SayHello(ctx, &rpc.HelloRequest{os.Args[2]}, grpc.Trailer(&md))
 	if err != nil {
+		st, ok := status.FromError(err)
+		if ok {
+			log.Println(st)
+		}
 		log.Fatalf("Can't hello: %v %v\n", err, md)
 	}
 	log.Printf("Hello: %s\n", hello)
