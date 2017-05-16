@@ -1,8 +1,7 @@
 package conf
 
 import (
-	"encoding/json"
-	"golang.org/x/oauth2"
+	"github.com/satori/go.uuid"
 	"io/ioutil"
 	"os"
 	"os/user"
@@ -32,34 +31,26 @@ func (c *Conf) domainHomePath() string {
 	return filepath.Join(c.User.HomeDir, "."+c.Name, c.Domain)
 }
 
-func (c *Conf) tokenPath() string {
-	return filepath.Join(c.domainHomePath(), "token.json")
+func (c *Conf) idPath() string {
+	return filepath.Join(c.domainHomePath(), "user.id")
 }
 
-func (c *Conf) SaveToken(token *oauth2.Token) error {
-	err := c.makeDomainHome()
-	if err != nil {
-		return err
+func (c *Conf) Token() (string, error) {
+	id, err := ioutil.ReadFile(c.idPath())
+	if err == nil {
+		return string(id), nil
 	}
-	raw, err := json.Marshal(token)
-	if err != nil {
-		return err
-	}
-	return ioutil.WriteFile(c.tokenPath(), raw, 0600)
-}
-
-func (c *Conf) Token() (*oauth2.Token, error) {
-	raw, err := ioutil.ReadFile(c.tokenPath())
-	if err != nil {
-		if os.IsNotExist(err) { // file not exist
-			return nil, nil
+	if os.IsNotExist(err) { // file not exist
+		err = c.makeDomainHome()
+		if err != nil {
+			return "", err
 		}
-		return nil, err
+		u := uuid.NewV4()
+		err = ioutil.WriteFile(c.idPath(), u.Bytes(), 0600)
+		if err != nil {
+			return "", err
+		}
+		return u.String(), nil
 	}
-	var token oauth2.Token
-	err = json.Unmarshal(raw, &token)
-	if err != nil {
-		return nil, err
-	}
-	return &token, nil
+	return "", err
 }

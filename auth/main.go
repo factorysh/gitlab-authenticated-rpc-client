@@ -1,27 +1,19 @@
 package auth
 
 import (
-	"encoding/base64"
-	"encoding/json"
 	"golang.org/x/net/context"
-	"golang.org/x/oauth2"
 )
 
-type JWTAuth struct {
-	Token *oauth2.Token
+type IdAuth struct {
+	Token string
 }
 
-func (j *JWTAuth) GetRequestMetadata(ctx context.Context, uri ...string) (map[string]string, error) {
-	data, err := json.Marshal(j.Token)
-	if err != nil {
-		return nil, err
-	}
-
+func (i *IdAuth) GetRequestMetadata(ctx context.Context, uri ...string) (map[string]string, error) {
 	return map[string]string{
-		"authorization": "Bearer " + base64.StdEncoding.EncodeToString(data),
+		"authorization": "Id " + i.Token,
 	}, nil
 }
 
-func (j *JWTAuth) RequireTransportSecurity() bool {
+func (i *IdAuth) RequireTransportSecurity() bool {
 	return true
 }

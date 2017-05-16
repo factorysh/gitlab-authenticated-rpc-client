@@ -36,7 +36,7 @@ func main() {
 	log.Println(t)
 	// Set up a connection to the server.
 	conn, err := grpc.Dial(domain+port,
-		grpc.WithPerRPCCredentials(&auth.JWTAuth{Token: t}),
+		grpc.WithPerRPCCredentials(&auth.IdAuth{Token: t}),
 		grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
 			InsecureSkipVerify: true,
 		})),
