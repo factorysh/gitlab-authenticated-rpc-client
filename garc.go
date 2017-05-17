@@ -6,9 +6,11 @@ import (
 	"log"
 	"os"
 	"runtime"
+	"strings"
 
 	"golang.org/x/net/context"
 
+	"github.com/skratchdot/open-golang/open"
 	"gitlab.bearstech.com/bearstech/journaleux/gar/client/auth"
 	"gitlab.bearstech.com/bearstech/journaleux/gar/client/conf"
 	"gitlab.bearstech.com/bearstech/journaleux/gar/rpc"
@@ -57,6 +59,13 @@ func main() {
 		st, ok := status.FromError(err)
 		if ok {
 			log.Println(st)
+		}
+		u, ok := md["gar.auth_code_url"]
+		if ok {
+			if !strings.HasPrefix(u[0], "https://") {
+				log.Fatal("Bad url prefix, we all gonna die")
+			}
+			open.Run(u[0])
 		}
 		log.Fatalf("Can't hello: %v %v\n", err, md)
 	}
