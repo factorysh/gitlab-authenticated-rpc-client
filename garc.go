@@ -10,6 +10,7 @@ import (
 
 	"golang.org/x/net/context"
 
+	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/skratchdot/open-golang/open"
 	"gitlab.bearstech.com/bearstech/journaleux/gar/client/auth"
 	"gitlab.bearstech.com/bearstech/journaleux/gar/client/conf"
@@ -75,5 +76,10 @@ func main() {
 		log.Fatalf("Can't hello: %v %v\n", err, md)
 	}
 	log.Printf("Super Hello: %s\n", hello)
+	u, err := h.WhoAmI(ctx, &empty.Empty{}, grpc.Trailer(&md))
+	if err != nil {
+		log.Fatalf("Can't who am I: %v %v\n", err, md)
+	}
+	log.Printf("Who am I?: %v\n", u)
 
 }
