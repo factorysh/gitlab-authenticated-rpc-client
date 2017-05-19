@@ -1,22 +1,17 @@
 package main
 
 import (
-	"crypto/tls"
-	"fmt"
 	"log"
 	"os"
-	"runtime"
 	"strings"
 
 	"golang.org/x/net/context"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/skratchdot/open-golang/open"
-	"gitlab.bearstech.com/bearstech/journaleux/gar/client/auth"
-	"gitlab.bearstech.com/bearstech/journaleux/gar/client/conf"
+	"gitlab.bearstech.com/bearstech/journaleux/gar/client/client"
 	"gitlab.bearstech.com/bearstech/journaleux/gar/rpc"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
@@ -32,22 +27,9 @@ var (
 func main() {
 	domain := os.Args[1]
 
-	cfg := conf.NewConf("gar", domain)
-	t, err := cfg.Token()
+	conn, err := client.NewConn(domain)
 	if err != nil {
 		log.Fatal(err)
-	}
-	log.Printf("Token: %s", t)
-	// Set up a connection to the server.
-	conn, err := grpc.Dial(domain+port,
-		grpc.WithPerRPCCredentials(&auth.IdAuth{Token: t}),
-		grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
-			InsecureSkipVerify: true,
-		})),
-		grpc.WithUserAgent(fmt.Sprintf("Journaleux %s #%s", runtime.GOOS, git_version)),
-	)
-	if err != nil {
-		log.Fatalf("did not connect: %v", err)
 	}
 	defer conn.Close()
 	h := rpc.NewHelloServiceClient(conn)
