@@ -9,8 +9,8 @@ import (
 
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/skratchdot/open-golang/open"
-	"gitlab.bearstech.com/bearstech/journaleux/gar/client/client"
-	"gitlab.bearstech.com/bearstech/journaleux/gar/rpc"
+	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/client"
+	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/rpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
