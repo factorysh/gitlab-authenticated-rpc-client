@@ -31,7 +31,7 @@ func NewConn(domain string) (*grpc.ClientConn, error) {
 	conn, err := grpc.Dial(domain+port,
 		grpc.WithPerRPCCredentials(&auth.IdAuth{Token: t}),
 		grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
-			InsecureSkipVerify: true,
+			InsecureSkipVerify: true, //FIXME don't do that on prod
 		})),
 		grpc.WithUserAgent(fmt.Sprintf("Journaleux %s #%s", runtime.GOOS, git_version)),
 	)
