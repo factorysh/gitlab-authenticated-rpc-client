@@ -27,24 +27,18 @@ func main() {
 		log.Fatal(err)
 	}
 	defer conn.Close()
-	h := rpc.NewHelloServiceClient(conn)
+	g := rpc.NewGitlabClient(conn)
 
 	ctx := context.Background()
+	_, err = g.Ping(ctx, &empty.Empty{})
+	if err != nil {
+		log.Fatalf("Can't ping: %v\n", err)
+	}
 
-	hello, err := h.SayHello(ctx, &rpc.HelloRequest{os.Args[2]})
+	u, err := g.MyUser(ctx, &empty.Empty{})
 	if err != nil {
-		log.Fatalf("Can't hello: %v\n", err)
+		log.Fatalf("Can't get my user: %v\n", err)
 	}
-	log.Printf("Hello: %s\n", hello)
-	hello, err = h.SayHello(ctx, &rpc.HelloRequest{"Super " + os.Args[2]})
-	if err != nil {
-		log.Fatalf("Can't hello: %v\n", err)
-	}
-	log.Printf("Super Hello: %s\n", hello)
-	u, err := h.WhoAmI(ctx, &empty.Empty{})
-	if err != nil {
-		log.Fatalf("Can't who am I: %v \n", err)
-	}
-	log.Printf("Who am I?: %v\n", u)
+	log.Println("User: ", u)
 
 }
