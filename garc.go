@@ -41,4 +41,10 @@ func main() {
 	}
 	log.Println("User: ", u)
 
+	p, err := g.MyProjects(ctx, &empty.Empty{})
+	if err != nil {
+		log.Fatalf("Can't get my projects: %v\n", err)
+	}
+	log.Println("Projects: ", p)
+
 }
