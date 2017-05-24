@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/urfave/cli"
 	"log"
 	"os"
@@ -55,7 +56,7 @@ func main() {
 				if err != nil {
 					return err
 				}
-				log.Println("User: ", u)
+				fmt.Printf("User:\n\t%+v\n", u)
 				return nil
 			},
 		},
@@ -78,8 +79,9 @@ func main() {
 				if err != nil {
 					return err
 				}
+				fmt.Printf("Projects:\n")
 				for _, p := range pp.Projects {
-					log.Println("\tProject: ", p)
+					fmt.Printf("\t%+v\n", p)
 				}
 				return nil
 			},
