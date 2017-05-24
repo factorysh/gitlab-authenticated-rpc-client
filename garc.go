@@ -13,10 +13,6 @@ const (
 	port = ":50051"
 )
 
-var (
-	git_version = ""
-)
-
 func main() {
 	var domain string
 
@@ -49,6 +45,12 @@ func main() {
 			Aliases: []string{"p"},
 			Usage:   "Get your projects",
 			Action:  cmd.Projects,
+		},
+		{
+			Name:    "version",
+			Aliases: []string{"v"},
+			Usage:   "Version release",
+			Action:  cmd.Version,
 		},
 	}
 
