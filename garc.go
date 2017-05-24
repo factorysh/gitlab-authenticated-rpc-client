@@ -1,16 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"github.com/urfave/cli"
 	"log"
 	"os"
 
-	"golang.org/x/net/context"
-
-	"github.com/golang/protobuf/ptypes/empty"
 	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/client"
-	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/rpc"
+	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/command"
 )
 
 const (
@@ -23,7 +19,6 @@ var (
 
 func main() {
 	var domain string
-	ctx := context.Background()
 
 	app := cli.NewApp()
 	app.Name = "Gitlab authenticated rpc client"
@@ -37,54 +32,23 @@ func main() {
 		},
 	}
 
+	conn, err := client.NewConn(domain)
+	if err != nil {
+		log.Fatal(err)
+	}
+	cmd := command.NewClient(conn)
 	app.Commands = []cli.Command{
 		{
 			Name:    "user",
 			Aliases: []string{"u"},
 			Usage:   "Get yourself",
-			Action: func(c *cli.Context) error {
-				conn, err := client.NewConn(domain)
-				if err != nil {
-					log.Fatal(err)
-				}
-				g := rpc.NewGitlabClient(conn)
-				_, err = g.Ping(ctx, &empty.Empty{})
-				if err != nil {
-					return err
-				}
-				u, err := g.MyUser(ctx, &empty.Empty{})
-				if err != nil {
-					return err
-				}
-				fmt.Printf("User:\n\t%+v\n", u)
-				return nil
-			},
+			Action:  cmd.User,
 		},
 		{
 			Name:    "projects",
 			Aliases: []string{"p"},
 			Usage:   "Get your projects",
-			Action: func(c *cli.Context) error {
-				conn, err := client.NewConn(domain)
-				if err != nil {
-					log.Fatal(err)
-				}
-				defer conn.Close()
-				g := rpc.NewGitlabClient(conn)
-				_, err = g.Ping(ctx, &empty.Empty{})
-				if err != nil {
-					return err
-				}
-				pp, err := g.MyProjects(ctx, &empty.Empty{})
-				if err != nil {
-					return err
-				}
-				fmt.Printf("Projects:\n")
-				for _, p := range pp.Projects {
-					fmt.Printf("\t%+v\n", p)
-				}
-				return nil
-			},
+			Action:  cmd.Projects,
 		},
 	}
 
