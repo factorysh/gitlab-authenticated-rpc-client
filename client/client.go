@@ -7,6 +7,7 @@ import (
 	"github.com/skratchdot/open-golang/open"
 	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/auth"
 	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/conf"
+	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/version"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -19,10 +20,6 @@ import (
 
 const (
 	port = ":50051"
-)
-
-var (
-	git_version = ""
 )
 
 func NewConn(domain string) (*grpc.ClientConn, error) {
@@ -40,7 +37,7 @@ func NewConn(domain string) (*grpc.ClientConn, error) {
 			InsecureSkipVerify: true, //FIXME don't do that on prod
 		})),
 		grpc.WithUnaryInterceptor(askForToken),
-		grpc.WithUserAgent(fmt.Sprintf("Journaleux %s #%s", runtime.GOOS, git_version)),
+		grpc.WithUserAgent(fmt.Sprintf("Journaleux %s #%s", runtime.GOOS, version.GitVersion)),
 	)
 	return conn, err
 }

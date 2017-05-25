@@ -6,20 +6,13 @@ import (
 	"sort"
 
 	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/command"
-)
-
-const (
-	port = ":50051"
-)
-
-var (
-	git_version = ""
+	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/version"
 )
 
 func main() {
 	app := cli.NewApp()
 	app.Name = "Gitlab authenticated rpc client"
-	app.Version = git_version
+	app.Version = version.GitVersion
 	app.EnableBashCompletion = true
 
 	app.Flags = []cli.Flag{
