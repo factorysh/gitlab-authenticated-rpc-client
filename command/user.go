@@ -8,7 +8,7 @@ import (
 )
 
 func (c *Client) User(_cli *cli.Context) error {
-	err := c.SetDomain(_cli.String("domain"))
+	err := c.SetDomain(_cli.GlobalString("domain"))
 	if err != nil {
 		return err
 	}
