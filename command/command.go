@@ -1,6 +1,7 @@
 package command
 
 import (
+	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/client"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
@@ -10,9 +11,13 @@ type Client struct {
 	Ctx  context.Context
 }
 
-func NewClient(conn *grpc.ClientConn) *Client {
+func NewClient() *Client {
 	return &Client{
-		Conn: conn,
-		Ctx:  context.Background(),
+		Ctx: context.Background(),
 	}
+}
+
+func (c *Client) SetDomain(domain string) (err error) {
+	c.Conn, err = client.NewConn(domain)
+	return err
 }

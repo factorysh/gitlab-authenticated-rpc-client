@@ -8,8 +8,12 @@ import (
 )
 
 func (c *Client) Projects(_cli *cli.Context) error {
+	err := c.SetDomain(_cli.String("domain"))
+	if err != nil {
+		return err
+	}
 	g := rpc.NewGitlabClient(c.Conn)
-	_, err := g.Ping(c.Ctx, &empty.Empty{})
+	_, err = g.Ping(c.Ctx, &empty.Empty{})
 	if err != nil {
 		return err
 	}

@@ -2,10 +2,9 @@ package main
 
 import (
 	"github.com/urfave/cli"
-	"log"
 	"os"
+	"sort"
 
-	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/client"
 	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/command"
 )
 
@@ -13,26 +12,25 @@ const (
 	port = ":50051"
 )
 
-func main() {
-	var domain string
+var (
+	git_version = ""
+)
 
+func main() {
 	app := cli.NewApp()
 	app.Name = "Gitlab authenticated rpc client"
+	app.Version = git_version
+	app.EnableBashCompletion = true
 
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
-			Name:        "domain, d",
-			Value:       "rpc.example.com",
-			Usage:       "Target RPC server",
-			Destination: &domain,
+			Name:  "domain, d",
+			Value: "rpc.example.com",
+			Usage: "Target RPC server",
 		},
 	}
 
-	conn, err := client.NewConn(domain)
-	if err != nil {
-		log.Fatal(err)
-	}
-	cmd := command.NewClient(conn)
+	cmd := command.NewClient()
 	app.Commands = []cli.Command{
 		{
 			Name:    "user",
@@ -46,13 +44,10 @@ func main() {
 			Usage:   "Get your projects",
 			Action:  cmd.Projects,
 		},
-		{
-			Name:    "version",
-			Aliases: []string{"v"},
-			Usage:   "Version release",
-			Action:  cmd.Version,
-		},
 	}
+
+	sort.Sort(cli.FlagsByName(app.Flags))
+	//sort.Sort(cli.CommandsByName(app.Commands))
 
 	app.Run(os.Args)
 
