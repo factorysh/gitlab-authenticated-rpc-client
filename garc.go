@@ -6,6 +6,7 @@ import (
 	"sort"
 
 	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/command"
+	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/display"
 	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/version"
 )
 
@@ -42,6 +43,9 @@ func main() {
 	sort.Sort(cli.FlagsByName(app.Flags))
 	//sort.Sort(cli.CommandsByName(app.Commands))
 
-	app.Run(os.Args)
+	err := app.Run(os.Args)
+	if err != nil {
+		display.Error("Error %v", err)
+	}
 
 }
