@@ -56,7 +56,7 @@ func askForToken(ctx context.Context, method string, req, resp interface{},
 			u, ok := md["gar.auth_code_url"]
 			if ok {
 				if !strings.HasPrefix(u[0], "https://") {
-					log.Fatal("Bad url prefix, we all gonna die")
+					log.Fatal("Bad url prefix, please ensure an https endpoint")
 				}
 				open.Run(u[0])
 				display.Warn("Invalid session, please authenticate at %s\n", u[0])
