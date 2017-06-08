@@ -39,7 +39,7 @@ func NewConn(domain string) (*grpc.ClientConn, error) {
 			InsecureSkipVerify: true, //FIXME don't do that on prod
 		})),
 		grpc.WithUnaryInterceptor(askForToken),
-		grpc.WithUserAgent(fmt.Sprintf("Journaleux %s #%s", runtime.GOOS, version.GitVersion)),
+		grpc.WithUserAgent(fmt.Sprintf("GAR %s #%s", runtime.GOOS, version.GitVersion)),
 	)
 	return conn, err
 }
