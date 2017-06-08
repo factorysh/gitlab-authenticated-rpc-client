@@ -7,7 +7,6 @@ import (
 	"github.com/skratchdot/open-golang/open"
 	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/auth"
 	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/conf"
-	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/display"
 	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/version"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -59,8 +58,7 @@ func askForToken(ctx context.Context, method string, req, resp interface{},
 					log.Fatal("Bad url prefix, please ensure an https endpoint")
 				}
 				open.Run(u[0])
-				display.Warn("Invalid session, please authenticate at %s\n", u[0])
-				return err
+				return fmt.Errorf("Invalid session, please authenticate at %s\n", u[0])
 			}
 		}
 		log.Fatalf("Can't hello: %v %v\n", err, md)
