@@ -17,6 +17,7 @@ import (
 	"log"
 	"runtime"
 	"strings"
+	"time"
 )
 
 const (
@@ -32,6 +33,7 @@ func NewConn(domain string) (*grpc.ClientConn, error) {
 	}
 
 	// Set up a connection to the server.
+	// doc https://godoc.org/google.golang.org/grpc#Dial
 	conn, err := grpc.Dial(domain+port,
 		grpc.WithPerRPCCredentials(&auth.IdAuth{Token: t}),
 		grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
@@ -39,6 +41,11 @@ func NewConn(domain string) (*grpc.ClientConn, error) {
 		})),
 		grpc.WithUnaryInterceptor(askForToken),
 		grpc.WithUserAgent(fmt.Sprintf("GAR %s #%s", runtime.GOOS, version.GitVersion)),
+		grpc.FailOnNonTempDialError(true),
+		// set a timeout
+		grpc.WithTimeout(4*time.Second),
+		// block until sucess or failure (needed to set err correctly)
+		grpc.WithBlock(),
 	)
 	return conn, err
 }
