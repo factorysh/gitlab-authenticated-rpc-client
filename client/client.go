@@ -47,6 +47,11 @@ func NewConn(domain string) (*grpc.ClientConn, error) {
 		// block until sucess or failure (needed to set err correctly)
 		grpc.WithBlock(),
 	)
+
+	if err != nil {
+		return conn, fmt.Errorf("Can't connect to %s:%s, is the remote service up ?", domain, port)
+	}
+
 	return conn, err
 }
 
