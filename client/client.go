@@ -70,7 +70,7 @@ func askForToken(ctx context.Context, method string, req, resp interface{},
 					log.Fatal("Bad url prefix, please ensure an https endpoint")
 				}
 				open.Run(u[0])
-				return fmt.Errorf("Invalid session, please authenticate at %s\n", u[0])
+				return fmt.Errorf("Invalid session:\n\tIn order to generate a new session, please authenticate at %s\n", u[0])
 			}
 		}
 		log.Fatalf("Can't hello: %v %v\n", err, md)
