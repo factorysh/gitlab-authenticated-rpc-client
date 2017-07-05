@@ -20,11 +20,10 @@ import (
 	"time"
 )
 
-const (
-	port = ":50051"
-)
-
 func NewConn(domain string) (*grpc.ClientConn, error) {
+	if len(strings.Split(domain, ":")) == 1 {
+		domain = domain + ":50051"
+	}
 
 	cfg := conf.NewConf("gar", domain)
 	t, err := cfg.Token()
@@ -34,7 +33,7 @@ func NewConn(domain string) (*grpc.ClientConn, error) {
 
 	// Set up a connection to the server.
 	// doc https://godoc.org/google.golang.org/grpc#Dial
-	conn, err := grpc.Dial(domain+port,
+	conn, err := grpc.Dial(domain,
 		grpc.WithPerRPCCredentials(&auth.IdAuth{Token: t}),
 		grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
 			InsecureSkipVerify: true, //FIXME don't do that on prod
@@ -49,7 +48,7 @@ func NewConn(domain string) (*grpc.ClientConn, error) {
 	)
 
 	if err != nil {
-		return conn, fmt.Errorf("Can't connect to %s:%s, is the remote service up ?", domain, port)
+		return conn, fmt.Errorf("Can't connect to %s, is the remote service up ?", domain)
 	}
 
 	return conn, err

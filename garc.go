@@ -19,7 +19,7 @@ func main() {
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name:  "domain, d",
-			Value: "rpc.example.com",
+			Value: "rpc.example.com:50051",
 			Usage: "Target RPC server",
 		},
 	}
