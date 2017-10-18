@@ -38,7 +38,7 @@ func NewConn(domain string) (*grpc.ClientConn, error) {
 		grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
 			InsecureSkipVerify: true, //FIXME don't do that on prod
 		})),
-		grpc.WithUnaryInterceptor(askForToken),
+		grpc.WithUnaryInterceptor(authInterceptor),
 		grpc.WithUserAgent(fmt.Sprintf("GAR %s #%s", runtime.GOOS, version.GitVersion)),
 		grpc.FailOnNonTempDialError(true),
 		// set a timeout
@@ -54,7 +54,7 @@ func NewConn(domain string) (*grpc.ClientConn, error) {
 	return conn, err
 }
 
-func askForToken(ctx context.Context, method string, req, resp interface{},
+func authInterceptor(ctx context.Context, method string, req, resp interface{},
 	cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 
 	md := metadata.Pairs()
