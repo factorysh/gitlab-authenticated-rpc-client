@@ -38,6 +38,12 @@ func main() {
 			Usage:   "Get your projects",
 			Action:  cmd.Projects,
 		},
+		{
+			Name:    "environments",
+			Aliases: []string{"e"},
+			Usage:   "Get your environments for a project",
+			Action:  cmd.Environments,
+		},
 	}
 
 	sort.Sort(cli.FlagsByName(app.Flags))
