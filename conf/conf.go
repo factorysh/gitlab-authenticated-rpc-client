@@ -1,7 +1,6 @@
 package conf
 
 import (
-	"github.com/satori/go.uuid"
 	"io/ioutil"
 	"os"
 	"os/user"
@@ -31,30 +30,21 @@ func (c *Conf) domainHomePath() string {
 	return filepath.Join(c.User.HomeDir, "."+c.Name, c.Domain)
 }
 
-func (c *Conf) idPath() string {
-	return filepath.Join(c.domainHomePath(), "user.id")
+func (c *Conf) tokenPath() string {
+	return filepath.Join(c.domainHomePath(), "token")
 }
 
-func (c *Conf) Token() (*uuid.UUID, error) {
-	id, err := ioutil.ReadFile(c.idPath())
+func (c *Conf) GetToken() (string, error) {
+	token, err := ioutil.ReadFile(c.tokenPath())
 	if err == nil {
-		u, err := uuid.FromBytes(id)
-		if err != nil {
-			return nil, err
-		}
-		return &u, nil
+		return string(token), nil
 	}
-	if os.IsNotExist(err) { // file not exist
-		err = c.makeDomainHome()
-		if err != nil {
-			return nil, err
-		}
-		u := uuid.NewV4()
-		err = ioutil.WriteFile(c.idPath(), u.Bytes(), 0600)
-		if err != nil {
-			return nil, err
-		}
-		return &u, nil
+	return "", nil
+}
+func (c *Conf) SetToken(token string) error {
+	err := c.makeDomainHome()
+	if err != nil {
+		return err
 	}
-	return nil, err
+	return ioutil.WriteFile(c.tokenPath(), []byte(token), 0600)
 }
