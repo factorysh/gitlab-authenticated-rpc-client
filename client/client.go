@@ -2,6 +2,7 @@ package client
 
 import (
 	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"github.com/pkg/errors"
 	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/auth"
@@ -9,12 +10,16 @@ import (
 	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/version"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"net"
 	"runtime"
 	"strings"
 	"time"
 )
 
-func NewConn(domain string) (*grpc.ClientConn, error) {
+/*
+certPool can be nil or contains a private CA, for non public TLS chain
+*/
+func NewConn(domain string, certPool *x509.CertPool) (*grpc.ClientConn, error) {
 	if len(strings.Split(domain, ":")) == 1 {
 		domain = domain + ":50051"
 	}
@@ -27,8 +32,12 @@ func NewConn(domain string) (*grpc.ClientConn, error) {
 
 	// Set up a connection to the server.
 	// doc https://godoc.org/google.golang.org/grpc#Dial
-	a := &auth.Auth{Token: t, SessionId: "", Conf: cfg}
-	conn, err := grpc.Dial(domain,
+	a := &auth.Auth{
+		Token:     t,
+		SessionId: "",
+		Conf:      cfg,
+	}
+	options := []grpc.DialOption{
 		grpc.WithPerRPCCredentials(a),
 		grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
 			InsecureSkipVerify: true, //FIXME don't do that on prod
@@ -37,10 +46,19 @@ func NewConn(domain string) (*grpc.ClientConn, error) {
 		grpc.WithUserAgent(fmt.Sprintf("GAR %s #%s", runtime.GOOS, version.GitVersion)),
 		grpc.FailOnNonTempDialError(true),
 		// set a timeout
-		grpc.WithTimeout(4*time.Second),
+		grpc.WithTimeout(4 * time.Second),
 		// block until sucess or failure (needed to set err correctly)
 		grpc.WithBlock(),
-	)
+	}
+	if certPool != nil {
+		dialer := func(address string, timeout time.Duration) (net.Conn, error) {
+			return tls.Dial("tcp", domain, &tls.Config{
+				RootCAs: certPool,
+			})
+		}
+		options = append(options, grpc.WithDialer(dialer))
+	}
+	conn, err := grpc.Dial(domain, options...)
 
 	if err != nil {
 		return conn, fmt.Errorf("Can't connect to %s, is the remote service up ?", domain)

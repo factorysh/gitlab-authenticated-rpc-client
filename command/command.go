@@ -18,6 +18,6 @@ func NewClient() *Client {
 }
 
 func (c *Client) SetDomain(domain string) (err error) {
-	c.Conn, err = client.NewConn(domain)
+	c.Conn, err = client.NewConn(domain, nil)
 	return err
 }
