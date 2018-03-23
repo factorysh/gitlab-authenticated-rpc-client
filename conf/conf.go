@@ -35,12 +35,17 @@ func (c *Conf) tokenPath() string {
 }
 
 func (c *Conf) GetToken() (string, error) {
-	token, err := ioutil.ReadFile(c.tokenPath())
+	token := os.Getenv("GAR_TOKEN")
+	if token != "" {
+		return token, nil
+	}
+	raw_token, err := ioutil.ReadFile(c.tokenPath())
 	if err == nil {
-		return string(token), nil
+		return string(raw_token), nil
 	}
 	return "", nil
 }
+
 func (c *Conf) SetToken(token string) error {
 	err := c.makeDomainHome()
 	if err != nil {
