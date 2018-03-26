@@ -51,6 +51,7 @@ func (a *Auth) AuthInterceptor(ctx context.Context, method string, req, resp int
 		newOpts := append(opts, grpc.Trailer(&md))
 		newCtx := context.WithValue(ctx, "gar.retry", retry)
 		err := invoker(newCtx, method, req, resp, cc, newOpts...)
+		//FIXME handle this error
 		// log.Printf("%#v", md)
 		// if the server send a token, store it
 		t, ok := md[TOKEN]
@@ -80,7 +81,10 @@ func (a *Auth) AuthInterceptor(ctx context.Context, method string, req, resp int
 					fmt.Printf("\n\n\t%s", u[0])
 					fmt.Printf("\n\n\tThen press Enter\n")
 					fmt.Scanln(&input)
+					//FIXME where this input is handled?
 					retry++
+				} else {
+					log.Fatal("Server didn't send authentication url")
 				}
 			} else {
 				log.Fatalf("Can't hello: %v %v\n", err, md)
