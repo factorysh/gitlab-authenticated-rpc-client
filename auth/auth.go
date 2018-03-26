@@ -44,12 +44,8 @@ func (a *Auth) RequireTransportSecurity() bool {
 
 func (a *Auth) AuthInterceptor(ctx context.Context, method string, req, resp interface{},
 	cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-
-	var (
-		input string
-		retry int
-	)
-	retry = 0
+	var input string
+	retry := 0
 	for {
 		md := metadata.Pairs()
 		newOpts := append(opts, grpc.Trailer(&md))
