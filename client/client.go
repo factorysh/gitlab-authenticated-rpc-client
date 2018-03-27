@@ -39,9 +39,6 @@ func NewConn(domain string, certPool *x509.CertPool) (*grpc.ClientConn, error) {
 	}
 	options := []grpc.DialOption{
 		grpc.WithPerRPCCredentials(a),
-		grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
-			InsecureSkipVerify: true, //FIXME don't do that on prod
-		})),
 		grpc.WithUnaryInterceptor(a.AuthInterceptor),
 		grpc.WithUserAgent(fmt.Sprintf("GAR %s #%s", runtime.GOOS, version.GitVersion)),
 		grpc.FailOnNonTempDialError(true),
@@ -52,11 +49,16 @@ func NewConn(domain string, certPool *x509.CertPool) (*grpc.ClientConn, error) {
 	}
 	if certPool != nil {
 		dialer := func(address string, timeout time.Duration) (net.Conn, error) {
-			return tls.Dial("tcp", domain, &tls.Config{
+			return tls.Dial("tcp", address, &tls.Config{
 				RootCAs: certPool,
 			})
 		}
 		options = append(options, grpc.WithDialer(dialer))
+		options = append(options, grpc.WithInsecure())
+	} else {
+		options = append(options, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
+			InsecureSkipVerify: true, //FIXME don't do that on prod
+		})))
 	}
 	conn, err := grpc.Dial(domain, options...)
 
