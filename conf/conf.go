@@ -1,6 +1,7 @@
 package conf
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/user"
@@ -43,7 +44,7 @@ func (c *Conf) GetToken() (string, error) {
 	if err == nil {
 		return string(raw_token), nil
 	}
-	return "", nil
+	return "", fmt.Errorf("Can't find token at path : %s", c.tokenPath())
 }
 
 func (c *Conf) SetToken(token string) error {
