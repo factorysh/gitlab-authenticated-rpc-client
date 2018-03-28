@@ -62,7 +62,8 @@ func NewConn(domain string, certPool *x509.CertPool) (*grpc.ClientConn, error) {
 	conn, err := grpc.Dial(domain, options...)
 
 	if err != nil {
-		return conn, fmt.Errorf("Can't connect to %s, is the remote service up ?", domain)
+		// FIXME better error handling : try TCP connect, TLS, and after grpc stuff
+		return nil, fmt.Errorf("Can't connect to %s, is the remote service up ? %s", domain, err)
 	}
 
 	return conn, err
