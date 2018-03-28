@@ -18,16 +18,29 @@ import (
 
 /*
 certPool can be nil or contains a private CA, for non public TLS chain
+
+tokens can be a session token, useful for testing, but please,
+IRL just use the file or the ENV.
+
 */
-func NewConn(domain string, certPool *x509.CertPool) (*grpc.ClientConn, error) {
+func NewConn(domain string, certPool *x509.CertPool, tokens ...string) (*grpc.ClientConn, error) {
+	if len(tokens) > 1 {
+		panic("Zero or one token is enough")
+	}
 	if len(strings.Split(domain, ":")) == 1 {
 		domain = domain + ":50051"
 	}
 
 	cfg := conf.NewConf("gar", domain)
-	t, err := cfg.GetToken()
-	if err != nil {
-		return nil, errors.Wrap(err, "Can't get token")
+	var t string
+	if len(tokens) > 0 {
+		t = tokens[0]
+	} else {
+		var err error
+		t, err = cfg.GetToken()
+		if err != nil {
+			return nil, errors.Wrap(err, "Can't get token")
+		}
 	}
 
 	// Set up a connection to the server.
