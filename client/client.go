@@ -53,8 +53,7 @@ func NewConn(domain string, certPool *x509.CertPool) (*grpc.ClientConn, error) {
 				RootCAs: certPool,
 			})
 		}
-		options = append(options, grpc.WithDialer(dialer))
-		options = append(options, grpc.WithInsecure())
+		options = append(options, grpc.WithInsecure(), grpc.WithDialer(dialer))
 	} else {
 		options = append(options, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
 			InsecureSkipVerify: true, //FIXME don't do that on prod
