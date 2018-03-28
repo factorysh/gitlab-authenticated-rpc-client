@@ -8,9 +8,9 @@ import (
 )
 
 type Conf struct {
-	Name   string
-	Domain string
-	User   *user.User
+	Name   string     // Project name, default is "gar"
+	Domain string     // Server name (and maybe the port)
+	User   *user.User // Current user
 }
 
 func NewConf(name, domain string) *Conf {
