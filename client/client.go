@@ -58,7 +58,9 @@ func NewConn(domain string, certPool *x509.CertPool, tokens ...string) (*grpc.Cl
 		// set a timeout
 		grpc.WithTimeout(4 * time.Second),
 		// block until sucess or failure (needed to set err correctly)
-		grpc.WithBlock(),
+		grpc.WithBlock(), grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
+			InsecureSkipVerify: true, //FIXME don't do that on prod
+		})),
 	}
 	if certPool != nil {
 		dialer := func(address string, timeout time.Duration) (net.Conn, error) {
@@ -66,11 +68,9 @@ func NewConn(domain string, certPool *x509.CertPool, tokens ...string) (*grpc.Cl
 				RootCAs: certPool,
 			})
 		}
-		options = append(options, grpc.WithInsecure(), grpc.WithDialer(dialer))
-	} else {
-		options = append(options, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
-			InsecureSkipVerify: true, //FIXME don't do that on prod
-		})))
+		options = append(options,
+			grpc.WithDialer(dialer),
+		)
 	}
 	conn, err := grpc.Dial(domain, options...)
 
