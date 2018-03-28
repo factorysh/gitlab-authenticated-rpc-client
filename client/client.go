@@ -65,7 +65,8 @@ func NewConn(domain string, certPool *x509.CertPool, tokens ...string) (*grpc.Cl
 		// set a timeout
 		grpc.WithTimeout(4 * time.Second),
 		// block until sucess or failure (needed to set err correctly)
-		grpc.WithBlock(), grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
+		grpc.WithBlock(),
+		grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
 			InsecureSkipVerify: true, //FIXME don't do that on prod
 		})),
 	}
