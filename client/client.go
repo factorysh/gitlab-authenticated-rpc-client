@@ -5,6 +5,7 @@ import (
 	"crypto/x509"
 	"fmt"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/auth"
 	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/conf"
 	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/version"
@@ -42,6 +43,12 @@ func NewConn(domain string, certPool *x509.CertPool, tokens ...string) (*grpc.Cl
 			return nil, errors.Wrap(err, "Can't get token")
 		}
 	}
+
+	log.WithFields(log.Fields{
+		"token":          t,
+		"domain":         domain,
+		"with_your_pool": certPool != nil,
+	}).Info("Connecting")
 
 	// Set up a connection to the server.
 	// doc https://godoc.org/google.golang.org/grpc#Dial
