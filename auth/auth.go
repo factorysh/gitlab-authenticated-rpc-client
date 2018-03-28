@@ -2,7 +2,6 @@ package auth
 
 import (
 	"fmt"
-	"log"
 	"strings"
 
 	"golang.org/x/net/context"
@@ -11,6 +10,7 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/skratchdot/open-golang/open"
 	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/conf"
 )
@@ -48,6 +48,9 @@ func (a *Auth) AuthInterceptor(ctx context.Context, method string, req, resp int
 	retry := 0
 	for {
 		md := metadata.Pairs()
+		log.WithFields(log.Fields{
+			"metadata": md,
+		}).Info("AuthInterceptor")
 		newOpts := append(opts, grpc.Trailer(&md))
 		newCtx := context.WithValue(ctx, "gar.retry", retry)
 		err := invoker(newCtx, method, req, resp, cc, newOpts...)
