@@ -24,6 +24,8 @@ func (c *Client) SetDomain(domain string) (err error) {
 	if err != nil {
 		return err
 	}
-	c.Conn, err = client.NewConn(domain, ca)
+	cc := client.New(domain)
+	cc.CertPool = ca
+	c.Conn, err = cc.ClientConn()
 	return err
 }
