@@ -1,9 +1,12 @@
 package client
 
 import (
-	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"runtime"
+	"strings"
+	"time"
+
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/auth"
@@ -11,10 +14,6 @@ import (
 	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/version"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	"net"
-	"runtime"
-	"strings"
-	"time"
 )
 
 /*
@@ -66,19 +65,8 @@ func NewConn(domain string, certPool *x509.CertPool, tokens ...string) (*grpc.Cl
 		grpc.WithTimeout(4 * time.Second),
 		// block until sucess or failure (needed to set err correctly)
 		grpc.WithBlock(),
-		grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
-			InsecureSkipVerify: true, //FIXME don't do that on prod
-		})),
-	}
-	if certPool != nil {
-		dialer := func(address string, timeout time.Duration) (net.Conn, error) {
-			return tls.Dial("tcp", address, &tls.Config{
-				RootCAs: certPool,
-			})
-		}
-		options = append(options,
-			grpc.WithDialer(dialer),
-		)
+		grpc.WithTransportCredentials(
+			credentials.NewClientTLSFromCert(certPool, "")),
 	}
 	conn, err := grpc.Dial(domain, options...)
 
@@ -86,6 +74,5 @@ func NewConn(domain string, certPool *x509.CertPool, tokens ...string) (*grpc.Cl
 		// FIXME better error handling : try TCP connect, TLS, and after grpc stuff
 		return nil, fmt.Errorf("Can't connect to %s, is the remote service up ? %s", domain, err)
 	}
-
 	return conn, err
 }
