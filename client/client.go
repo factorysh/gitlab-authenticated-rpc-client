@@ -12,6 +12,7 @@ import (
 	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/auth"
 	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/conf"
 	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/version"
+	_rpc "gitlab.bearstech.com/factory/gitlab-authenticated-rpc/rpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -84,4 +85,12 @@ func (c *Client) ClientConn() (*grpc.ClientConn, error) {
 		return nil, fmt.Errorf("Can't connect to %s, is the remote service up ? %s", c.Domain, err)
 	}
 	return conn, err
+}
+
+func (c *Client) NewGitlabClient() (_rpc.GitlabClient, error) {
+	cc, err := c.ClientConn()
+	if err != nil {
+		return nil, err
+	}
+	return _rpc.NewGitlabClient(cc), nil
 }
