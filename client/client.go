@@ -16,25 +16,30 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
-/*
-certPool can be nil or contains a private CA, for non public TLS chain
+type Client struct {
+	Domain         string
+	Client         *grpc.ClientConn
+	Token          string
+	CertPool       *x509.CertPool
+	AuthWithGitlab bool
+}
 
-tokens can be a session token, useful for testing, but please,
-IRL just use the file or the ENV.
-
-*/
-func NewConn(domain string, certPool *x509.CertPool, tokens ...string) (*grpc.ClientConn, error) {
-	if len(tokens) > 1 {
-		panic("Zero or one token is enough")
-	}
+func New(domain string) *Client {
 	if len(strings.Split(domain, ":")) == 1 {
 		domain = domain + ":50051"
 	}
+	return &Client{
+		Domain:         domain,
+		AuthWithGitlab: true,
+	}
+}
 
-	cfg := conf.NewConf("gar", domain)
+func (c *Client) ClientConn() (*grpc.ClientConn, error) {
+
+	cfg := conf.NewConf("gar", c.Domain)
 	var t string
-	if len(tokens) > 0 {
-		t = tokens[0]
+	if c.Token != "" {
+		t = c.Token
 	} else {
 		var err error
 		t, err = cfg.GetToken()
@@ -45,8 +50,8 @@ func NewConn(domain string, certPool *x509.CertPool, tokens ...string) (*grpc.Cl
 
 	log.WithFields(log.Fields{
 		"token":          t,
-		"domain":         domain,
-		"with_your_pool": certPool != nil,
+		"domain":         c.Domain,
+		"with_your_pool": c.CertPool != nil,
 	}).Info("Connecting")
 
 	// Set up a connection to the server.
@@ -58,7 +63,6 @@ func NewConn(domain string, certPool *x509.CertPool, tokens ...string) (*grpc.Cl
 	}
 	options := []grpc.DialOption{
 		grpc.WithPerRPCCredentials(a),
-		grpc.WithUnaryInterceptor(a.AuthInterceptor),
 		grpc.WithUserAgent(fmt.Sprintf("GAR %s #%s", runtime.GOOS, version.GitVersion)),
 		grpc.FailOnNonTempDialError(true),
 		// set a timeout
@@ -66,13 +70,18 @@ func NewConn(domain string, certPool *x509.CertPool, tokens ...string) (*grpc.Cl
 		// block until sucess or failure (needed to set err correctly)
 		grpc.WithBlock(),
 		grpc.WithTransportCredentials(
-			credentials.NewClientTLSFromCert(certPool, "")),
+			credentials.NewClientTLSFromCert(c.CertPool, "")),
 	}
-	conn, err := grpc.Dial(domain, options...)
+	if c.AuthWithGitlab {
+		options = append(options,
+			grpc.WithUnaryInterceptor(a.AuthInterceptor),
+		)
+	}
+	conn, err := grpc.Dial(c.Domain, options...)
 
 	if err != nil {
 		// FIXME better error handling : try TCP connect, TLS, and after grpc stuff
-		return nil, fmt.Errorf("Can't connect to %s, is the remote service up ? %s", domain, err)
+		return nil, fmt.Errorf("Can't connect to %s, is the remote service up ? %s", c.Domain, err)
 	}
 	return conn, err
 }
