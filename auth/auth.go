@@ -99,5 +99,4 @@ func (a *Auth) AuthInterceptor(ctx context.Context, method string, req, resp int
 			return nil
 		}
 	}
-	return nil
 }
