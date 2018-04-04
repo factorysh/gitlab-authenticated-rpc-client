@@ -13,12 +13,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/skratchdot/open-golang/open"
 	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/conf"
-)
-
-const (
-	AUTH_CODE_URL = "gar.auth_code_url"
-	SESSION_ID    = "gar.session_id"
-	TOKEN         = "gar.oauth_token"
+	garMetadata "gitlab.bearstech.com/factory/gitlab-authenticated-rpc/metadata"
 )
 
 type Auth struct {
@@ -57,7 +52,7 @@ func (a *Auth) AuthInterceptor(ctx context.Context, method string, req, resp int
 		//FIXME handle this error
 		// log.Printf("%#v", md)
 		// if the server send a token, store it
-		t, ok := md[TOKEN]
+		t, ok := md[garMetadata.Token]
 		if ok {
 			a.SessionId = ""
 			a.Token = t[0]
@@ -69,11 +64,11 @@ func (a *Auth) AuthInterceptor(ctx context.Context, method string, req, resp int
 		if err != nil {
 			st, ok := status.FromError(err)
 			if ok && st.Code() == codes.Unauthenticated {
-				s, ok := md[SESSION_ID]
+				s, ok := md[garMetadata.SessionID]
 				if ok {
 					a.SessionId = s[0]
 				}
-				u, ok := md[AUTH_CODE_URL]
+				u, ok := md[garMetadata.AuthCodeURL]
 				if ok {
 					if !strings.HasPrefix(u[0], "https://") {
 						log.Fatal("Bad url prefix, please ensure an https endpoint")
