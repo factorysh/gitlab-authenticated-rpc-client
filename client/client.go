@@ -17,6 +17,7 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
+// Client is the high level client
 type Client struct {
 	Domain         string
 	Client         *grpc.ClientConn
@@ -25,6 +26,7 @@ type Client struct {
 	AuthWithGitlab bool
 }
 
+// New client
 func New(domain string) *Client {
 	if len(strings.Split(domain, ":")) == 1 {
 		domain = domain + ":50051"
@@ -35,6 +37,7 @@ func New(domain string) *Client {
 	}
 }
 
+// ClientConn is the grpc client connection
 func (c *Client) ClientConn() (*grpc.ClientConn, error) {
 
 	cfg := conf.NewConf("gar", c.Domain)
@@ -87,6 +90,7 @@ func (c *Client) ClientConn() (*grpc.ClientConn, error) {
 	return conn, err
 }
 
+// NewGitlabClient : new grpc client instance
 func (c *Client) NewGitlabClient() (_rpc.GitlabClient, error) {
 	cc, err := c.ClientConn()
 	if err != nil {
