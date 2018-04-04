@@ -22,6 +22,8 @@ type Auth struct {
 	Conf      *conf.Conf
 }
 
+// GetRequestMetadata gets the current request metadata
+// Implements https://godoc.org/google.golang.org/grpc/credentials#PerRPCCredentials
 func (a *Auth) GetRequestMetadata(ctx context.Context, uri ...string) (map[string]string, error) {
 	m := make(map[string]string)
 	if a.Token != "" {
@@ -33,10 +35,14 @@ func (a *Auth) GetRequestMetadata(ctx context.Context, uri ...string) (map[strin
 	return m, nil
 }
 
+// RequireTransportSecurity indicates whether the credentials requires transport security.
+// Implements https://godoc.org/google.golang.org/grpc/credentials#PerRPCCredentials
 func (a *Auth) RequireTransportSecurity() bool {
 	return true
 }
 
+// AuthInterceptor intercepts the execution of a unary RPC on the client
+// Implements https://godoc.org/google.golang.org/grpc#UnaryClientInterceptor
 func (a *Auth) AuthInterceptor(ctx context.Context, method string, req, resp interface{},
 	cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 	var input string
