@@ -16,6 +16,7 @@ import (
 	garMetadata "gitlab.bearstech.com/factory/gitlab-authenticated-rpc/metadata"
 )
 
+// Auth client
 type Auth struct {
 	Token     string
 	SessionID string
