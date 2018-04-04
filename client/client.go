@@ -59,7 +59,7 @@ func (c *Client) ClientConn() (*grpc.ClientConn, error) {
 	// doc https://godoc.org/google.golang.org/grpc#Dial
 	a := &auth.Auth{
 		Token:     t,
-		SessionId: "",
+		SessionID: "",
 		Conf:      cfg,
 	}
 	options := []grpc.DialOption{
