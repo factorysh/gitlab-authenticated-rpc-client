@@ -18,7 +18,7 @@ import (
 
 type Auth struct {
 	Token     string
-	SessionId string
+	SessionID string
 	Conf      *conf.Conf
 }
 
@@ -27,8 +27,8 @@ func (a *Auth) GetRequestMetadata(ctx context.Context, uri ...string) (map[strin
 	if a.Token != "" {
 		m["authorization"] = a.Token
 	}
-	if a.SessionId != "" {
-		m["session"] = a.SessionId
+	if a.SessionID != "" {
+		m["session"] = a.SessionID
 	}
 	return m, nil
 }
@@ -54,7 +54,7 @@ func (a *Auth) AuthInterceptor(ctx context.Context, method string, req, resp int
 		// if the server send a token, store it
 		t, ok := md[garMetadata.Token]
 		if ok {
-			a.SessionId = ""
+			a.SessionID = ""
 			a.Token = t[0]
 			err := a.Conf.SetToken(a.Token)
 			if err != nil {
@@ -66,7 +66,7 @@ func (a *Auth) AuthInterceptor(ctx context.Context, method string, req, resp int
 			if ok && st.Code() == codes.Unauthenticated {
 				s, ok := md[garMetadata.SessionID]
 				if ok {
-					a.SessionId = s[0]
+					a.SessionID = s[0]
 				}
 				u, ok := md[garMetadata.AuthCodeURL]
 				if ok {
