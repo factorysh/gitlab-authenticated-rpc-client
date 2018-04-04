@@ -5,6 +5,8 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type Conf struct {
@@ -39,9 +41,14 @@ func (c *Conf) GetToken() (string, error) {
 	if token != "" {
 		return token, nil
 	}
-	raw_token, err := ioutil.ReadFile(c.tokenPath())
+	path := c.tokenPath()
+	rawToken, err := ioutil.ReadFile(path)
 	if err == nil {
-		return string(raw_token), nil
+		log.WithFields(log.Fields{
+			"path":  path,
+			"token": string(rawToken),
+		}).Info("GetToken")
+		return string(rawToken), nil
 	}
 	return "", nil // an empty token, it can be the first connection
 }
