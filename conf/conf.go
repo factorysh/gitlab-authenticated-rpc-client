@@ -39,6 +39,10 @@ func (c *Conf) tokenPath() string {
 func (c *Conf) GetToken() (string, error) {
 	token := os.Getenv("GAR_TOKEN")
 	if token != "" {
+		log.WithFields(log.Fields{
+			"ENV":   "GAR_TOKEN",
+			"token": token,
+		}).Info("GetToken")
 		return token, nil
 	}
 	path := c.tokenPath()
