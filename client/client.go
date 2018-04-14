@@ -3,6 +3,7 @@ package client
 import (
 	"crypto/x509"
 	"fmt"
+	"os"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -28,11 +29,20 @@ func New(domain string) *Client {
 	if len(strings.Split(domain, ":")) == 1 {
 		domain = domain + ":50051"
 	}
-	return &Client{
+	client := &Client{
 		Domain:         domain,
 		AuthWithGitlab: true,
 		Conf:           conf.NewConf("gar", domain),
 	}
+	caPath := os.Getenv("CA_PATH")
+	if caPath != "" {
+		ca, err := conf.GetCA(caPath)
+		if err != nil {
+			panic(err)
+		}
+		client.CertPool = ca
+	}
+	return client
 }
 
 // ClientConn is the grpc client connection
