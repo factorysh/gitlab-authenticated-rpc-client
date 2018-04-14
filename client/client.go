@@ -3,18 +3,15 @@ package client
 import (
 	"crypto/x509"
 	"fmt"
-	"runtime"
 	"strings"
-	"time"
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/auth"
 	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/conf"
-	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/version"
+	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/dial"
 	_rpc "gitlab.bearstech.com/factory/gitlab-authenticated-rpc/rpc"
 	_auth "gitlab.bearstech.com/factory/gitlab-authenticated-rpc/rpc_auth"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 )
 
 // Client is the high level client
@@ -47,18 +44,9 @@ func (c *Client) ClientConn(wirthRPCCredential bool) (*grpc.ClientConn, error) {
 
 	// Set up a connection to the server.
 	// doc https://godoc.org/google.golang.org/grpc#Dial
-	options := []grpc.DialOption{
-		grpc.WithUserAgent(fmt.Sprintf("GAR %s #%s", runtime.GOOS, version.GitVersion)),
-		grpc.FailOnNonTempDialError(true),
-		// set a timeout
-		grpc.WithTimeout(15 * time.Second),
-		// block until sucess or failure (needed to set err correctly)
-		grpc.WithBlock(),
-		grpc.WithTransportCredentials(
-			credentials.NewClientTLSFromCert(c.CertPool, "")),
-	}
+	options := dial.ClientDialOptions(c.CertPool)
 	if wirthRPCCredential {
-		a := auth.New(c.Conf)
+		a := auth.New(c.Conf, c.CertPool)
 		options = append(options, grpc.WithPerRPCCredentials(a))
 		if c.AuthWithGitlab {
 			options = append(options,

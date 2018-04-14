@@ -1,9 +1,9 @@
 package auth
 
 import (
-	"fmt"
-	"runtime"
-	"time"
+	"crypto/x509"
+
+	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/dial"
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -15,7 +15,6 @@ import (
 	"github.com/prometheus/common/log"
 	"github.com/skratchdot/open-golang/open"
 	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/conf"
-	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/version"
 	_auth "gitlab.bearstech.com/factory/gitlab-authenticated-rpc/rpc_auth"
 )
 
@@ -23,12 +22,14 @@ import (
 type Auth struct {
 	SessionID string
 	Conf      *conf.Conf
+	CertPool  *x509.CertPool
 	client    *grpc.ClientConn
 }
 
-func New(cfg *conf.Conf) *Auth {
+func New(cfg *conf.Conf, cert *x509.CertPool) *Auth {
 	return &Auth{
-		Conf: cfg,
+		Conf:     cfg,
+		CertPool: cert,
 	}
 }
 
@@ -36,15 +37,8 @@ func (a *Auth) cliencConn() (*grpc.ClientConn, error) {
 	if a.client != nil {
 		return a.client, nil
 	}
-	options := []grpc.DialOption{
-		grpc.WithUserAgent(fmt.Sprintf("GAR %s #%s", runtime.GOOS, version.GitVersion)),
-		grpc.FailOnNonTempDialError(true),
-		// set a timeout
-		grpc.WithTimeout(4 * time.Second),
-		// block until sucess or failure (needed to set err correctly)
-		grpc.WithBlock(),
-		grpc.WithInsecure(),
-	}
+	options := append(dial.ClientDialOptions(a.CertPool), grpc.WithInsecure())
+
 	// TODO domain can come from an header
 	conn, err := grpc.Dial(a.Conf.Domain, options...)
 	if err != nil {
