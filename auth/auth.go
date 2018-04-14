@@ -2,7 +2,8 @@ package auth
 
 import (
 	"fmt"
-	"strings"
+	"runtime"
+	"time"
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -10,30 +11,60 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/prometheus/common/log"
 	"github.com/skratchdot/open-golang/open"
 	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/conf"
-	garMetadata "gitlab.bearstech.com/factory/gitlab-authenticated-rpc/metadata"
+	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/version"
+	_auth "gitlab.bearstech.com/factory/gitlab-authenticated-rpc/rpc_auth"
 )
 
 // Auth client
 type Auth struct {
-	Token     string
 	SessionID string
 	Conf      *conf.Conf
+	client    *grpc.ClientConn
+}
+
+func New(cfg *conf.Conf) *Auth {
+	return &Auth{
+		Conf: cfg,
+	}
+}
+
+func (a *Auth) cliencConn() (*grpc.ClientConn, error) {
+	if a.client != nil {
+		return a.client, nil
+	}
+	options := []grpc.DialOption{
+		grpc.WithUserAgent(fmt.Sprintf("GAR %s #%s", runtime.GOOS, version.GitVersion)),
+		grpc.FailOnNonTempDialError(true),
+		// set a timeout
+		grpc.WithTimeout(4 * time.Second),
+		// block until sucess or failure (needed to set err correctly)
+		grpc.WithBlock(),
+		grpc.WithInsecure(),
+	}
+	// TODO domain can come from an header
+	conn, err := grpc.Dial(a.Conf.Domain, options...)
+	if err != nil {
+		return nil, err
+	}
+	a.client = conn
+	return conn, nil
 }
 
 // GetRequestMetadata gets the current request metadata
 // Implements https://godoc.org/google.golang.org/grpc/credentials#PerRPCCredentials
 func (a *Auth) GetRequestMetadata(ctx context.Context, uri ...string) (map[string]string, error) {
-	m := make(map[string]string)
-	if a.Token != "" {
-		m["authorization"] = a.Token
+	log.Info("GetRequestMetadata uri:", uri)
+	t, err := a.Conf.GetToken()
+	if err != nil {
+		return nil, err
 	}
-	if a.SessionID != "" {
-		m["session"] = a.SessionID
-	}
-	return m, nil
+	return map[string]string{
+		"authorization": "bearer " + t,
+	}, nil
 }
 
 // RequireTransportSecurity indicates whether the credentials requires transport security.
@@ -46,57 +77,66 @@ func (a *Auth) RequireTransportSecurity() bool {
 // Implements https://godoc.org/google.golang.org/grpc#UnaryClientInterceptor
 func (a *Auth) AuthInterceptor(ctx context.Context, method string, req, resp interface{},
 	cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-	var input string
-	retry := 0
-	for {
-		md := metadata.Pairs()
-		log.WithFields(log.Fields{
-			"metadata": md,
-		}).Info("AuthInterceptor")
-		newOpts := append(opts, grpc.Trailer(&md))
-		newCtx := context.WithValue(ctx, "gar.retry", retry)
-		err := invoker(newCtx, method, req, resp, cc, newOpts...)
-		//FIXME handle this error
-		// log.Printf("%#v", md)
-		// if the server send a token, store it
-		t, ok := md[garMetadata.Token]
-		if ok {
-			a.SessionID = ""
-			a.Token = t[0]
-			err := a.Conf.SetToken(a.Token)
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
-		if err != nil {
-			st, ok := status.FromError(err)
-			if ok && st.Code() == codes.Unauthenticated {
-				s, ok := md[garMetadata.SessionID]
-				if ok {
-					a.SessionID = s[0]
-				}
-				u, ok := md[garMetadata.AuthCodeURL]
-				if ok {
-					if !strings.HasPrefix(u[0], "https://") {
-						log.Fatal("Bad url prefix, please ensure an https endpoint")
-					}
-					open.Run(u[0])
-					fmt.Printf("Invalid session:")
-					fmt.Printf("\n\tIn order to generate a new session, please authenticate at:")
-					fmt.Printf("\n\n\t%s", u[0])
-					fmt.Printf("\n\n\tThen press Enter\n")
-					fmt.Scanln(&input)
-					//FIXME where this input is handled?
-					retry++
-				} else {
-					log.Fatal("Server didn't send authentication url")
-				}
-			} else {
-				log.Fatalf("Can't hello: %v %v\n", err, md)
-				return err
-			}
-		} else {
-			return nil
-		}
+
+	jwt, err := a.Conf.GetToken()
+	if err != nil {
+		return err
 	}
+	var ctx2 context.Context
+	if jwt == "" {
+		ctx2, err = a.authDance(ctx)
+		if err != nil {
+			return err
+		}
+	} else {
+		ctx2 = ctx
+	}
+	rpcErr := invoker(ctx2, method, req, resp, cc, opts...)
+	if rpcErr == nil {
+		return nil
+	}
+	st, ok := status.FromError(rpcErr)
+	if !ok { // It's not an http error
+		return rpcErr
+	}
+	if st.Code() != codes.Unauthenticated {
+		return rpcErr
+	}
+	// Handle unauthenticated error
+	ctx2, err = a.authDance(ctx)
+	if err != nil {
+		return err
+	}
+
+	// FIXME set token in the header
+	return invoker(ctx2, method, req, resp, cc, opts...)
+}
+
+func (a *Auth) authorize(ctx context.Context, token string) context.Context {
+	return metadata.AppendToOutgoingContext(ctx,
+		"authorization", "bearer "+token)
+}
+
+func (a *Auth) authDance(ctx context.Context) (context.Context, error) {
+
+	cc, err := a.cliencConn()
+	if err != nil {
+		return ctx, err
+	}
+	aa := _auth.NewAuthClient(cc)
+	// FIXME a.Client == nil
+	authCtx := context.Background()
+	authinfo, err := aa.Bootstrap(authCtx, &empty.Empty{})
+	if err != nil {
+		return ctx, err
+	}
+	open.Run(authinfo.Url)
+	j, err := aa.Authenticate(authCtx, &_auth.Token{
+		Token: authinfo.Token,
+	})
+	if err != nil {
+		return ctx, err
+	}
+	err = a.Conf.SetToken(j.JWT)
+	return a.authorize(ctx, authinfo.Token), err
 }

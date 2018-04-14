@@ -18,6 +18,7 @@ func TestPing(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, &empty.Empty{}, r)
 }
+
 func TestMyUser(t *testing.T) {
 	c := New(os.Getenv("DOMAIN"))
 	g, err := c.NewGitlabClient()
