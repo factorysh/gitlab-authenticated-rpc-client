@@ -37,7 +37,7 @@ func (a *Auth) cliencConn() (*grpc.ClientConn, error) {
 	if a.client != nil {
 		return a.client, nil
 	}
-	options := append(dial.ClientDialOptions(a.CertPool), grpc.WithInsecure())
+	options := dial.ClientDialOptions(a.CertPool)
 
 	// TODO domain can come from an header
 	conn, err := grpc.Dial(a.Conf.Domain, options...)
