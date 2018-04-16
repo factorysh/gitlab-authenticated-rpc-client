@@ -20,16 +20,18 @@ import (
 
 // Auth client
 type Auth struct {
-	SessionID string
-	Conf      *conf.Conf
-	CertPool  *x509.CertPool
-	client    *grpc.ClientConn
+	SessionID           string
+	Conf                *conf.Conf
+	CertPool            *x509.CertPool
+	client              *grpc.ClientConn
+	TryToAuthWithGitlab bool
 }
 
 func New(cfg *conf.Conf, cert *x509.CertPool) *Auth {
 	return &Auth{
-		Conf:     cfg,
-		CertPool: cert,
+		Conf:                cfg,
+		CertPool:            cert,
+		TryToAuthWithGitlab: true,
 	}
 }
 
@@ -77,7 +79,7 @@ func (a *Auth) AuthInterceptor(ctx context.Context, method string, req, resp int
 		return err
 	}
 	var ctx2 context.Context
-	if jwt == "" {
+	if jwt == "" && a.TryToAuthWithGitlab {
 		ctx2, err = a.authDance(ctx)
 		if err != nil {
 			return err
@@ -93,10 +95,10 @@ func (a *Auth) AuthInterceptor(ctx context.Context, method string, req, resp int
 	if !ok { // It's not an http error
 		return rpcErr
 	}
-	if st.Code() != codes.Unauthenticated {
+	if (st.Code() != codes.Unauthenticated) || !a.TryToAuthWithGitlab {
 		return rpcErr
 	}
-	// Handle unauthenticated error
+	// Handle unauthenticated error and try to authenticate with Gitlab
 	ctx2, err = a.authDance(ctx)
 	if err != nil {
 		return err
@@ -112,7 +114,7 @@ func (a *Auth) authorize(ctx context.Context, token string) context.Context {
 }
 
 func (a *Auth) authDance(ctx context.Context) (context.Context, error) {
-
+	log.Info("Auth dance")
 	cc, err := a.cliencConn()
 	if err != nil {
 		return ctx, err
