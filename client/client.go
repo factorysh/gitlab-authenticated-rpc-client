@@ -22,6 +22,7 @@ type Client struct {
 	CertPool       *x509.CertPool
 	AuthWithGitlab bool
 	Conf           *conf.Conf
+	Auth           *auth.Auth
 }
 
 // New client
@@ -42,11 +43,12 @@ func New(domain string) *Client {
 		}
 		client.CertPool = ca
 	}
+	client.Auth = auth.New(client.Conf, client.CertPool)
 	return client
 }
 
 // ClientConn is the grpc client connection
-func (c *Client) ClientConn(wirthRPCCredential bool) (*grpc.ClientConn, error) {
+func (c *Client) ClientConn(withRPCCredential bool) (*grpc.ClientConn, error) {
 	log.WithFields(log.Fields{
 		"domain":         c.Domain,
 		"with_your_pool": c.CertPool != nil,
@@ -55,12 +57,11 @@ func (c *Client) ClientConn(wirthRPCCredential bool) (*grpc.ClientConn, error) {
 	// Set up a connection to the server.
 	// doc https://godoc.org/google.golang.org/grpc#Dial
 	options := dial.ClientDialOptions(c.CertPool)
-	if wirthRPCCredential {
-		a := auth.New(c.Conf, c.CertPool)
-		options = append(options, grpc.WithPerRPCCredentials(a))
+	if withRPCCredential {
+		options = append(options, grpc.WithPerRPCCredentials(c.Auth))
 		if c.AuthWithGitlab {
 			options = append(options,
-				grpc.WithUnaryInterceptor(a.AuthInterceptor),
+				grpc.WithUnaryInterceptor(c.Auth.AuthInterceptor),
 			)
 		}
 	}
