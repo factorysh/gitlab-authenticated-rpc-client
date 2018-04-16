@@ -15,6 +15,7 @@ type Conf struct {
 	User       *user.User // Current user
 	token      string
 	WriteToken bool
+	ReadToken  bool
 }
 
 func NewConf(name, domain string) *Conf {
@@ -24,6 +25,7 @@ func NewConf(name, domain string) *Conf {
 		Domain:     domain,
 		User:       usr,
 		WriteToken: true,
+		ReadToken:  true,
 	}
 }
 
@@ -53,15 +55,17 @@ func (c *Conf) GetToken() (string, error) {
 		c.token = token
 		return token, nil
 	}
-	path := c.tokenPath()
-	rawToken, err := ioutil.ReadFile(path)
-	if err == nil {
-		log.WithFields(log.Fields{
-			"path":  path,
-			"token": string(rawToken),
-		}).Info("GetToken")
-		c.token = string(rawToken)
-		return string(rawToken), nil
+	if c.ReadToken {
+		path := c.tokenPath()
+		rawToken, err := ioutil.ReadFile(path)
+		if err == nil {
+			log.WithFields(log.Fields{
+				"path":  path,
+				"token": string(rawToken),
+			}).Info("GetToken")
+			c.token = string(rawToken)
+			return string(rawToken), nil
+		}
 	}
 	return "", nil // an empty token, it can be the first connection
 }
