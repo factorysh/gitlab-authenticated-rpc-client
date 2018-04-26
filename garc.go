@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/urfave/cli"
 	"os"
 	"sort"
+
+	"github.com/urfave/cli"
 
 	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/command"
 	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/display"
@@ -43,6 +44,11 @@ func main() {
 			Aliases: []string{"e"},
 			Usage:   "Get your environments for a project",
 			Action:  cmd.Environments,
+		},
+		{
+			Name:   "ping",
+			Usage:  "Ping the server, without auth",
+			Action: cmd.Ping,
 		},
 	}
 
