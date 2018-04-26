@@ -28,6 +28,7 @@ type Auth struct {
 	TryToAuthWithGitlab bool
 }
 
+// New Auth object
 func New(cfg *conf.Conf, cert *x509.CertPool) *Auth {
 	return &Auth{
 		Conf:                cfg,
