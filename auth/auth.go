@@ -2,6 +2,7 @@ package auth
 
 import (
 	"crypto/x509"
+	"os"
 
 	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/dial"
 
@@ -72,19 +73,27 @@ func (a *Auth) RequireTransportSecurity() bool {
 // Implements https://godoc.org/google.golang.org/grpc#UnaryClientInterceptor
 func (a *Auth) AuthInterceptor(ctx context.Context, method string, req, resp interface{},
 	cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-
-	jwt, err := a.Conf.GetToken()
-	if err != nil {
-		return err
-	}
 	var ctx2 context.Context
-	if jwt == "" && a.TryToAuthWithGitlab {
-		ctx2, err = a.authDance(ctx)
+	var err error
+	privateToken := os.Getenv("GITLAB_PRIVATE_TOKEN")
+	if privateToken != "" {
+		ctx2, err = a.privateToken(ctx, privateToken)
 		if err != nil {
 			return err
 		}
 	} else {
-		ctx2 = ctx
+		jwt, err := a.Conf.GetToken()
+		if err != nil {
+			return err
+		}
+		if jwt == "" && a.TryToAuthWithGitlab {
+			ctx2, err = a.authDance(ctx)
+			if err != nil {
+				return err
+			}
+		} else {
+			ctx2 = ctx
+		}
 	}
 	rpcErr := invoker(ctx2, method, req, resp, cc, opts...)
 	if rpcErr == nil {
@@ -110,6 +119,24 @@ func (a *Auth) AuthInterceptor(ctx context.Context, method string, req, resp int
 func (a *Auth) authorize(ctx context.Context, token string) context.Context {
 	return metadata.AppendToOutgoingContext(ctx,
 		"authorization", "bearer "+token)
+}
+
+func (a *Auth) privateToken(ctx context.Context, privateToken string) (context.Context, error) {
+	log.Info("Auth with a gitlab's private token")
+	cc, err := a.cliencConn()
+	if err != nil {
+		return ctx, err
+	}
+	aa := _auth.NewAuthClient(cc)
+	authCtx := context.Background()
+	j, err := aa.AuthenticateWithGitlabPrivateToken(authCtx, &_auth.GitlabPrivateToken{
+		Token: privateToken,
+	})
+	if err != nil {
+		return ctx, err
+	}
+	err = a.Conf.SetToken(j.JWT)
+	return a.authorize(ctx, j.JWT), err
 }
 
 func (a *Auth) authDance(ctx context.Context) (context.Context, error) {
