@@ -13,7 +13,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/prometheus/common/log"
+	log "github.com/sirupsen/logrus"
 	"github.com/skratchdot/open-golang/open"
 	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/conf"
 	_auth "gitlab.bearstech.com/factory/gitlab-authenticated-rpc/rpc_auth"
@@ -150,6 +150,9 @@ func (a *Auth) authDance(ctx context.Context) (context.Context, error) {
 	// FIXME a.Client == nil
 	authCtx := context.Background()
 	authinfo, err := aa.Bootstrap(authCtx, &empty.Empty{})
+	log.WithFields(log.Fields{
+		"token": authinfo.Token,
+	}).Info("Boostrap")
 	if err != nil {
 		return ctx, err
 	}
