@@ -41,7 +41,6 @@ func (a *Auth) cliencConn() (*grpc.ClientConn, error) {
 	}
 	options := dial.ClientDialOptions(a.CertPool)
 
-	// TODO domain can come from an header
 	conn, err := grpc.Dial(a.Conf.Domain, options...)
 	if err != nil {
 		return nil, err
