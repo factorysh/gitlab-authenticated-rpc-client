@@ -4,6 +4,7 @@ import (
 	"os"
 	"sort"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 
 	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/command"
@@ -19,14 +20,29 @@ func main() {
 
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
-			Name:  "domain, d",
-			Value: "rpc.example.com:50051",
-			Usage: "Target RPC server",
+			Name:   "domain, d",
+			Value:  "rpc.example.com:50051",
+			Usage:  "Target RPC server",
+			EnvVar: "DOMAIN",
+		},
+		cli.BoolFlag{
+			Name:  "verbose, vv",
+			Usage: "Log verbosity",
 		},
 	}
 
 	cmd := command.NewClient()
+	app.Before = func(c *cli.Context) error {
+		if c.GlobalBool("verbose") {
+			log.SetLevel(log.DebugLevel)
+			log.Debug("Verbose")
+		} else {
+			log.SetLevel(log.InfoLevel)
+		}
+		return nil
+	}
 	app.Commands = []cli.Command{
+
 		{
 			Name:    "user",
 			Aliases: []string{"u"},
