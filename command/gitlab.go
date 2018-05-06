@@ -19,7 +19,7 @@ func (g *GitlabClient) rpcClient() rpc.GitlabClient {
 	return rpc.NewGitlabClient(g.Client.Conn)
 }
 
-func RegisterGitlab(g *GitlabClient, app *cli.App) {
+func (g *GitlabClient) Register(app *cli.App) {
 	registerEnvironements(g, app)
 	registerProjects(g, app)
 	registerUsers(g, app)

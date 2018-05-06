@@ -27,13 +27,6 @@ func NewApp() *cli.App {
 		},
 	}
 
-	cmd := NewClient()
-	aa := NewAuthClient(cmd)
-	gg := NewGitlabClient(cmd)
-
-	RegisterAuth(aa, app)
-	RegisterGitlab(gg, app)
-
 	app.Before = func(c *cli.Context) error {
 		if c.GlobalBool("verbose") {
 			log.SetLevel(log.DebugLevel)

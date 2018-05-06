@@ -9,6 +9,13 @@ import (
 
 func main() {
 	app := command.NewApp()
+
+	cmd := command.NewClient()
+	aa := command.NewAuthClient(cmd)
+	gg := command.NewGitlabClient(cmd)
+
+	aa.Register(app)
+	gg.Register(app)
 	err := app.Run(os.Args)
 	if err != nil {
 		display.Error("Error %v", err)

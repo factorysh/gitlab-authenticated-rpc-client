@@ -17,6 +17,6 @@ func (a *AuthClient) rpcClient() auth.AuthClient {
 	return auth.NewAuthClient(a.Client.Conn)
 }
 
-func RegisterAuth(a *AuthClient, app *cli.App) {
+func (a *AuthClient) Register(app *cli.App) {
 	registerPing(a, app)
 }
