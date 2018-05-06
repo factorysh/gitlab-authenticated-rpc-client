@@ -2,14 +2,15 @@ package command
 
 import (
 	"github.com/urfave/cli"
+	_cli "gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/cli"
 	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/rpc_auth"
 )
 
 type AuthClient struct {
-	Client *Client
+	Client *_cli.Client
 }
 
-func NewAuthClient(client *Client) *AuthClient {
+func NewAuthClient(client *_cli.Client) *AuthClient {
 	return &AuthClient{Client: client}
 }
 

@@ -2,16 +2,17 @@ package command
 
 import (
 	"github.com/urfave/cli"
+	_cli "gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/cli"
 	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/rpc"
 )
 
 // GitlabClient is client for Gitlab rpc
 type GitlabClient struct {
-	Client *Client
+	Client *_cli.Client
 }
 
 // NewGitlabClient return a new GitlabClient
-func NewGitlabClient(client *Client) *GitlabClient {
+func NewGitlabClient(client *_cli.Client) *GitlabClient {
 	return &GitlabClient{Client: client}
 }
 

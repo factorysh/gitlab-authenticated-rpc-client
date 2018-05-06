@@ -1,33 +1,33 @@
-package command
+package cli
 
 import (
 	"sort"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/urfave/cli"
+	_cli "github.com/urfave/cli"
 	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/version"
 )
 
-func NewApp() *cli.App {
-	app := cli.NewApp()
+func NewApp() *_cli.App {
+	app := _cli.NewApp()
 	app.Name = "Gitlab authenticated rpc client"
 	app.Version = version.GitVersion
 	app.EnableBashCompletion = true
 
-	app.Flags = []cli.Flag{
-		cli.StringFlag{
+	app.Flags = []_cli.Flag{
+		_cli.StringFlag{
 			Name:   "domain, d",
 			Value:  "rpc.example.com:50051",
 			Usage:  "Target RPC server",
 			EnvVar: "DOMAIN",
 		},
-		cli.BoolFlag{
+		_cli.BoolFlag{
 			Name:  "verbose, vv",
 			Usage: "Log verbosity",
 		},
 	}
 
-	app.Before = func(c *cli.Context) error {
+	app.Before = func(c *_cli.Context) error {
 		if c.GlobalBool("verbose") {
 			log.SetLevel(log.DebugLevel)
 			log.Debug("Verbose")
@@ -37,7 +37,18 @@ func NewApp() *cli.App {
 		return nil
 	}
 
-	sort.Sort(cli.FlagsByName(app.Flags))
+	sort.Sort(_cli.FlagsByName(app.Flags))
 	//sort.Sort(cli.CommandsByName(app.Commands))
 	return app
+}
+
+// Registrable CLI
+type Registrable interface {
+	Register(app *_cli.App)
+}
+
+func Register(app *_cli.App, registrables ...Registrable) {
+	for _, registrable := range registrables {
+		registrable.Register(app)
+	}
 }

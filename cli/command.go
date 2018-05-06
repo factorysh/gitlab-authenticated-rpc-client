@@ -1,4 +1,4 @@
-package command
+package cli
 
 import (
 	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/client"
