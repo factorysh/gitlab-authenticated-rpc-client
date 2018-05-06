@@ -1,6 +1,8 @@
 package command
 
 import (
+	"fmt"
+
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/urfave/cli"
 )
@@ -15,6 +17,7 @@ func (c *AuthClient) Ping(_cli *cli.Context) error {
 	if err != nil {
 		return err
 	}
+	fmt.Println("Pong")
 	return nil
 }
 
