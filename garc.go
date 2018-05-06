@@ -32,6 +32,12 @@ func main() {
 	}
 
 	cmd := command.NewClient()
+	aa := command.NewAuthClient(cmd)
+	gg := command.NewGitlabClient(cmd)
+
+	command.RegisterAuth(aa, app)
+	command.RegisterGitlab(gg, app)
+
 	app.Before = func(c *cli.Context) error {
 		if c.GlobalBool("verbose") {
 			log.SetLevel(log.DebugLevel)
@@ -40,32 +46,6 @@ func main() {
 			log.SetLevel(log.InfoLevel)
 		}
 		return nil
-	}
-	app.Commands = []cli.Command{
-
-		{
-			Name:    "user",
-			Aliases: []string{"u"},
-			Usage:   "Get yourself",
-			Action:  cmd.User,
-		},
-		{
-			Name:    "projects",
-			Aliases: []string{"p"},
-			Usage:   "Get your projects",
-			Action:  cmd.Projects,
-		},
-		{
-			Name:    "environments",
-			Aliases: []string{"e"},
-			Usage:   "Get your environments for a project",
-			Action:  cmd.Environments,
-		},
-		{
-			Name:   "ping",
-			Usage:  "Ping the server, without auth",
-			Action: cmd.Ping,
-		},
 	}
 
 	sort.Sort(cli.FlagsByName(app.Flags))

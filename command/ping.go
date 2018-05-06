@@ -3,18 +3,25 @@ package command
 import (
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/urfave/cli"
-	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/rpc_auth"
 )
 
-func (c *Client) Ping(_cli *cli.Context) error {
-	err := c.SetDomain(_cli.GlobalString("domain"))
+func (c *AuthClient) Ping(_cli *cli.Context) error {
+	err := c.Client.SetDomain(_cli.GlobalString("domain"))
 	if err != nil {
 		return err
 	}
-	a := auth.NewAuthClient(c.Conn)
-	_, err = a.Ping(c.Ctx, &empty.Empty{})
+	a := c.rpcClient()
+	_, err = a.Ping(c.Client.Ctx, &empty.Empty{})
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func registerPing(a *AuthClient, app *cli.App) {
+	app.Commands = append(app.Commands, cli.Command{
+		Name:   "ping",
+		Usage:  "Ping the server, without auth",
+		Action: a.Ping,
+	})
 }

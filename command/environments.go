@@ -3,13 +3,14 @@ package command
 import (
 	"errors"
 	"fmt"
+
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/urfave/cli"
 	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/rpc"
 )
 
-func (c *Client) Environments(_cli *cli.Context) error {
-	err := c.SetDomain(_cli.GlobalString("domain"))
+func (c *GitlabClient) Environments(_cli *cli.Context) error {
+	err := c.Client.SetDomain(_cli.GlobalString("domain"))
 	if err != nil {
 		return err
 	}
@@ -20,12 +21,12 @@ func (c *Client) Environments(_cli *cli.Context) error {
 	if pid == "" {
 		return errors.New("Invalid project name")
 	}
-	g := rpc.NewGitlabClient(c.Conn)
-	_, err = g.Ping(c.Ctx, &empty.Empty{})
+	g := c.rpcClient()
+	_, err = g.Ping(c.Client.Ctx, &empty.Empty{})
 	if err != nil {
 		return err
 	}
-	envs, err := g.MyEnvironments(c.Ctx, &rpc.ProjectPredicate{Id: pid})
+	envs, err := g.MyEnvironments(c.Client.Ctx, &rpc.ProjectPredicate{Id: pid})
 	if err != nil {
 		return err
 	}
@@ -34,4 +35,13 @@ func (c *Client) Environments(_cli *cli.Context) error {
 		fmt.Printf("\t%+v\n", p)
 	}
 	return nil
+}
+
+func registerEnvironements(g *GitlabClient, app *cli.App) {
+	app.Commands = append(app.Commands, cli.Command{
+		Name:    "environments",
+		Aliases: []string{"e"},
+		Usage:   "Get your environments for a project",
+		Action:  g.Environments,
+	})
 }

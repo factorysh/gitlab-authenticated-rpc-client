@@ -2,22 +2,22 @@ package command
 
 import (
 	"fmt"
+
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/urfave/cli"
-	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/rpc"
 )
 
-func (c *Client) Projects(_cli *cli.Context) error {
-	err := c.SetDomain(_cli.GlobalString("domain"))
+func (c *GitlabClient) Projects(_cli *cli.Context) error {
+	err := c.Client.SetDomain(_cli.GlobalString("domain"))
 	if err != nil {
 		return err
 	}
-	g := rpc.NewGitlabClient(c.Conn)
-	_, err = g.Ping(c.Ctx, &empty.Empty{})
+	g := c.rpcClient()
+	_, err = g.Ping(c.Client.Ctx, &empty.Empty{})
 	if err != nil {
 		return err
 	}
-	pp, err := g.MyProjects(c.Ctx, &empty.Empty{})
+	pp, err := g.MyProjects(c.Client.Ctx, &empty.Empty{})
 	if err != nil {
 		return err
 	}
@@ -26,4 +26,13 @@ func (c *Client) Projects(_cli *cli.Context) error {
 		fmt.Printf("\t%+v\n", p)
 	}
 	return nil
+}
+
+func registerProjects(g *GitlabClient, app *cli.App) {
+	app.Commands = append(app.Commands, cli.Command{
+		Name:    "projects",
+		Aliases: []string{"p"},
+		Usage:   "Get your projects",
+		Action:  g.Projects,
+	})
 }
