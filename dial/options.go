@@ -21,7 +21,7 @@ func ClientDialOptions(cert *x509.CertPool) []grpc.DialOption {
 		grpc.FailOnNonTempDialError(true),
 		// set a timeout
 		grpc.WithTimeout(Timeout),
-		// block until sucess or failure (needed to set err correctly)
+		// block until success or failure (needed to set err correctly)
 		grpc.WithBlock(),
 		grpc.WithTransportCredentials(
 			credentials.NewClientTLSFromCert(cert, "")),
