@@ -4,7 +4,7 @@ import (
 	"crypto/x509"
 	"os"
 
-	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/dial"
+	"github.com/factorysh/gitlab-authenticated-rpc-client/dial"
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -12,11 +12,11 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
+	"github.com/factorysh/gitlab-authenticated-rpc-client/conf"
+	_auth "github.com/factorysh/gitlab-authenticated-rpc-client/rpc_auth"
 	"github.com/golang/protobuf/ptypes/empty"
 	log "github.com/sirupsen/logrus"
 	"github.com/skratchdot/open-golang/open"
-	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/conf"
-	_auth "gitlab.bearstech.com/factory/gitlab-authenticated-rpc/rpc_auth"
 )
 
 // Auth client

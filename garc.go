@@ -3,9 +3,9 @@ package main
 import (
 	"os"
 
-	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/cli"
-	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/command"
-	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/display"
+	"github.com/factorysh/gitlab-authenticated-rpc-client/cli"
+	"github.com/factorysh/gitlab-authenticated-rpc-client/command"
+	"github.com/factorysh/gitlab-authenticated-rpc-client/display"
 )
 
 func main() {

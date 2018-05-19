@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/factorysh/gitlab-authenticated-rpc-client/rpc_gitlab"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/urfave/cli"
-	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/rpc"
 )
 
 func (c *GitlabClient) Environments(_cli *cli.Context) error {

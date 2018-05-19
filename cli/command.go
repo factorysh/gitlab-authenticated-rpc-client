@@ -1,7 +1,7 @@
 package cli
 
 import (
-	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/client"
+	"github.com/factorysh/gitlab-authenticated-rpc-client/client"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )

@@ -3,9 +3,9 @@ package cli
 import (
 	"sort"
 
+	"github.com/factorysh/gitlab-authenticated-rpc-client/version"
 	log "github.com/sirupsen/logrus"
 	_cli "github.com/urfave/cli"
-	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/version"
 )
 
 func NewApp() *_cli.App {

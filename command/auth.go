@@ -1,9 +1,9 @@
 package command
 
 import (
+	_cli "github.com/factorysh/gitlab-authenticated-rpc-client/cli"
+	"github.com/factorysh/gitlab-authenticated-rpc-client/rpc_auth"
 	"github.com/urfave/cli"
-	_cli "gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/cli"
-	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/rpc_auth"
 )
 
 type AuthClient struct {

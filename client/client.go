@@ -6,12 +6,12 @@ import (
 	"os"
 	"strings"
 
+	"github.com/factorysh/gitlab-authenticated-rpc-client/auth"
+	"github.com/factorysh/gitlab-authenticated-rpc-client/conf"
+	"github.com/factorysh/gitlab-authenticated-rpc-client/dial"
+	_auth "github.com/factorysh/gitlab-authenticated-rpc-client/rpc_auth"
+	_rpc "github.com/factorysh/gitlab-authenticated-rpc-client/rpc_gitlab"
 	log "github.com/sirupsen/logrus"
-	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/auth"
-	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/conf"
-	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/dial"
-	_rpc "gitlab.bearstech.com/factory/gitlab-authenticated-rpc/rpc"
-	_auth "gitlab.bearstech.com/factory/gitlab-authenticated-rpc/rpc_auth"
 	"google.golang.org/grpc"
 )
 

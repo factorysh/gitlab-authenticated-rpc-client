@@ -1,9 +1,9 @@
 package command
 
 import (
+	_cli "github.com/factorysh/gitlab-authenticated-rpc-client/cli"
+	"github.com/factorysh/gitlab-authenticated-rpc-client/rpc_gitlab"
 	"github.com/urfave/cli"
-	_cli "gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/cli"
-	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/rpc"
 )
 
 // GitlabClient is client for Gitlab rpc

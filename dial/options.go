@@ -6,7 +6,7 @@ import (
 	"runtime"
 	"time"
 
-	"gitlab.bearstech.com/factory/gitlab-authenticated-rpc/client/version"
+	"github.com/factorysh/gitlab-authenticated-rpc-client/version"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
