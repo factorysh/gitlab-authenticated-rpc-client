@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package rpc;
+
+import "google/protobuf/empty.proto";
+
+service Gitlab {
+    rpc Ping(google.protobuf.Empty) returns (google.protobuf.Empty);
+    rpc MyUser(google.protobuf.Empty) returns (User);
+    rpc MyProjects(google.protobuf.Empty) returns (Projects);
+    rpc MyEnvironments(ProjectPredicate) returns (Environments);
+}
+
+message User {
+    string Username = 1;
+}
+
+message Project {
+    string Path              = 1;
+    string PathWithNamespace = 2;
+    string Name              = 3;
+}
+
+message Projects {
+    repeated Project Projects = 1;
+}
+
+message ProjectPredicate {
+    // can be an int or project path
+    string Id = 1;
+}
+
+message Environment {
+    string Name              = 1;
+    string Slug              = 2;
+    string ExternalURL       = 3;
+}
+
+message Environments {
+    repeated Environment Environments = 1;
+}

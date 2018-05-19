@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package auth;
+
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+
+service Auth {
+    rpc Ping(google.protobuf.Empty) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/v1/auth/ping"
+            body: "*"
+        };
+    };
+    rpc Bootstrap(google.protobuf.Empty) returns (AuthInfo);
+    rpc Authenticate(Token) returns (JWT);
+    rpc AuthenticateWithGitlabPrivateToken(GitlabPrivateToken) returns (JWT);
+}
+
+message AuthInfo{
+    string Url = 1;
+    string Token = 2;
+}
+
+message Token {
+    string Token = 1;
+}
+
+message JWT {
+    string JWT = 1;
+}
+
+message GitlabPrivateToken {
+    string Token = 1;
+}
