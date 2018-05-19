@@ -302,8 +302,9 @@ var _ grpc.ClientConn
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion4
 
-// Client API for Gitlab service
-
+// GitlabClient is the client API for Gitlab service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type GitlabClient interface {
 	Ping(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*empty.Empty, error)
 	MyUser(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*User, error)
@@ -321,7 +322,7 @@ func NewGitlabClient(cc *grpc.ClientConn) GitlabClient {
 
 func (c *gitlabClient) Ping(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*empty.Empty, error) {
 	out := new(empty.Empty)
-	err := grpc.Invoke(ctx, "/rpc.Gitlab/Ping", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/rpc.Gitlab/Ping", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -330,7 +331,7 @@ func (c *gitlabClient) Ping(ctx context.Context, in *empty.Empty, opts ...grpc.C
 
 func (c *gitlabClient) MyUser(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*User, error) {
 	out := new(User)
-	err := grpc.Invoke(ctx, "/rpc.Gitlab/MyUser", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/rpc.Gitlab/MyUser", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -339,7 +340,7 @@ func (c *gitlabClient) MyUser(ctx context.Context, in *empty.Empty, opts ...grpc
 
 func (c *gitlabClient) MyProjects(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*Projects, error) {
 	out := new(Projects)
-	err := grpc.Invoke(ctx, "/rpc.Gitlab/MyProjects", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/rpc.Gitlab/MyProjects", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -348,15 +349,14 @@ func (c *gitlabClient) MyProjects(ctx context.Context, in *empty.Empty, opts ...
 
 func (c *gitlabClient) MyEnvironments(ctx context.Context, in *ProjectPredicate, opts ...grpc.CallOption) (*Environments, error) {
 	out := new(Environments)
-	err := grpc.Invoke(ctx, "/rpc.Gitlab/MyEnvironments", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/rpc.Gitlab/MyEnvironments", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// Server API for Gitlab service
-
+// GitlabServer is the server API for Gitlab service.
 type GitlabServer interface {
 	Ping(context.Context, *empty.Empty) (*empty.Empty, error)
 	MyUser(context.Context, *empty.Empty) (*User, error)

@@ -200,8 +200,9 @@ var _ grpc.ClientConn
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion4
 
-// Client API for Auth service
-
+// AuthClient is the client API for Auth service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type AuthClient interface {
 	Ping(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*empty.Empty, error)
 	Bootstrap(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*AuthInfo, error)
@@ -219,7 +220,7 @@ func NewAuthClient(cc *grpc.ClientConn) AuthClient {
 
 func (c *authClient) Ping(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*empty.Empty, error) {
 	out := new(empty.Empty)
-	err := grpc.Invoke(ctx, "/auth.Auth/Ping", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/auth.Auth/Ping", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -228,7 +229,7 @@ func (c *authClient) Ping(ctx context.Context, in *empty.Empty, opts ...grpc.Cal
 
 func (c *authClient) Bootstrap(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*AuthInfo, error) {
 	out := new(AuthInfo)
-	err := grpc.Invoke(ctx, "/auth.Auth/Bootstrap", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/auth.Auth/Bootstrap", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -237,7 +238,7 @@ func (c *authClient) Bootstrap(ctx context.Context, in *empty.Empty, opts ...grp
 
 func (c *authClient) Authenticate(ctx context.Context, in *Token, opts ...grpc.CallOption) (*JWT, error) {
 	out := new(JWT)
-	err := grpc.Invoke(ctx, "/auth.Auth/Authenticate", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/auth.Auth/Authenticate", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -246,15 +247,14 @@ func (c *authClient) Authenticate(ctx context.Context, in *Token, opts ...grpc.C
 
 func (c *authClient) AuthenticateWithGitlabPrivateToken(ctx context.Context, in *GitlabPrivateToken, opts ...grpc.CallOption) (*JWT, error) {
 	out := new(JWT)
-	err := grpc.Invoke(ctx, "/auth.Auth/AuthenticateWithGitlabPrivateToken", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/auth.Auth/AuthenticateWithGitlabPrivateToken", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// Server API for Auth service
-
+// AuthServer is the server API for Auth service.
 type AuthServer interface {
 	Ping(context.Context, *empty.Empty) (*empty.Empty, error)
 	Bootstrap(context.Context, *empty.Empty) (*AuthInfo, error)
