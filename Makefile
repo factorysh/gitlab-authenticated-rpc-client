@@ -12,7 +12,7 @@ pull:
 	docker pull bearstech/golang-dep:latest
 
 client: bin vendor
-	go build -ldflags "-X version.GitVersion=$(shell git rev-parse HEAD)" \
+	go build -ldflags "-X version.GitVersion=$(shell git rev-parse HEAD || echo '🐔')" \
 		-o bin/garc github.com/factorysh/gitlab-authenticated-rpc-client
 
 protoc:
